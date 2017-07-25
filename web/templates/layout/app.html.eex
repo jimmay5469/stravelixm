@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Hello Stravelixm!</title>
+    <title>Stravelixm</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
 
@@ -18,14 +18,15 @@
           <ul class="nav nav-pills pull-right">
             <li>
               <%= if strava = Plug.Conn.get_session(@conn, :strava) do %>
-                <a href="<%= page_path(@conn, :logout) %>"><%= strava["athlete"]["username"] %></a>
+                Hi <%= strava["athlete"]["firstname"] %>!
+                (<a href="<%= page_path(@conn, :logout) %>">logout</a>)
               <% else %>
                 <a href="https://www.strava.com/oauth/authorize?client_id=<%= Application.get_env(:stravelixm, :strava_client_id) %>&response_type=code&redirect_uri=<%= Stravelixm.Router.Helpers.url(@conn) %>/token_exchange&scope=view_private,write&approval_prompt=force">Login</a>
               <% end %>
             </li>
           </ul>
         </nav>
-        <span class="logo"></span>
+        <h1>Stravelixm</h1>
       </header>
 
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
