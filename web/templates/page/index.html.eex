@@ -3,3 +3,4 @@
     <li><%= activity["name"] %></li>
   <% end) %>
 </ul>
+<div id="elm-target"></div>
