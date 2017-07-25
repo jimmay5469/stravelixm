@@ -7,7 +7,9 @@ use Mix.Config
 
 # General application configuration
 config :stravelixm,
-  ecto_repos: [Stravelixm.Repo]
+  ecto_repos: [Stravelixm.Repo],
+  strava_client_id: System.get_env("STRAVA_CLIENT_ID"),
+  strava_client_secret: System.get_env("STRAVA_CLIENT_SECRET")
 
 # Configures the endpoint
 config :stravelixm, Stravelixm.Endpoint,

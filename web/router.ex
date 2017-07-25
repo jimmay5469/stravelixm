@@ -17,6 +17,8 @@ defmodule Stravelixm.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
+    get "/token_exchange", PageController, :token_exchange
+    get "/logout", PageController, :logout
   end
 
   # Other scopes may use custom stacks.

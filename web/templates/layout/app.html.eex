@@ -16,7 +16,13 @@
       <header class="header">
         <nav role="navigation">
           <ul class="nav nav-pills pull-right">
-            <li><a href="http://www.phoenixframework.org/docs">Get Started</a></li>
+            <li>
+              <%= if strava = Plug.Conn.get_session(@conn, :strava) do %>
+                <a href="<%= page_path(@conn, :logout) %>"><%= strava["athlete"]["username"] %></a>
+              <% else %>
+                <a href="https://www.strava.com/oauth/authorize?client_id=<%= Application.get_env(:stravelixm, :strava_client_id) %>&response_type=code&redirect_uri=<%= Stravelixm.Router.Helpers.url(@conn) %>/token_exchange&scope=view_private,write&approval_prompt=force">Login</a>
+              <% end %>
+            </li>
           </ul>
         </nav>
         <span class="logo"></span>
