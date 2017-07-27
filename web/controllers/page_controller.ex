@@ -4,7 +4,6 @@ defmodule Stravelixm.PageController do
   def index(conn, _params) do
     activities = []
     if strava = get_session(conn, :strava) do
-      HTTPoison.start
       {:ok, response} = HTTPoison.get(
         "https://www.strava.com/api/v3/athlete/activities",
         [Authorization: "Bearer #{strava["access_token"]}"]
@@ -15,7 +14,6 @@ defmodule Stravelixm.PageController do
   end
 
   def token_exchange(conn, %{"code" => code}) do
-    HTTPoison.start
     {:ok, response} = HTTPoison.post(
       "https://www.strava.com/oauth/token",
       {:form, [client_id: Application.get_env(:stravelixm, :strava_client_id), client_secret: Application.get_env(:stravelixm, :strava_client_secret), code: code]}
