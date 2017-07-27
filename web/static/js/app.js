@@ -23,5 +23,12 @@ import "phoenix_html"
 import Elm from "./main";
 const elmDiv = document.querySelector("#elm-target");
 if (elmDiv) {
-  Elm.Main.embed(elmDiv);
+  const activities = JSON.parse(elmDiv.dataset.activities);
+  const flags = {
+    activities: activities.map(activity => activity.name)
+  };
+
+  console.log({ activities }, flags)
+
+  Elm.Main.embed(elmDiv, flags);
 }
