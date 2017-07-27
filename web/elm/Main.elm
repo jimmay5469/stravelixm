@@ -1,5 +1,6 @@
 module Main exposing (..)
-import Html exposing (Html, text, ul, li)
+import Html exposing (..)
+import Html.Attributes exposing (..)
 
 main =
     Html.programWithFlags
@@ -12,12 +13,17 @@ main =
 
 -- MODEL
 type alias Model =
-    { activities: List String }
+    { activities: List Activity }
+
+type alias Activity =
+    { id: Int
+    , name: String
+    }
 
 
 -- INIT
 type alias Flags =
-    { activities: List String }
+    { activities: List Activity }
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
@@ -46,6 +52,9 @@ view : Model -> Html Msg
 view model =
     ul [] (List.map viewActivity model.activities)
 
-viewActivity : String -> Html Msg
+viewActivity : Activity -> Html Msg
 viewActivity activity =
-    li [] [ text activity ]
+    li []
+        [ a [ href ("https://www.strava.com/activities/" ++ (toString activity.id)) ]
+            [ text activity.name ]
+        ]
