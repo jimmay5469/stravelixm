@@ -189,28 +189,40 @@ GoogleMapsLoader.KEY = elmDiv.dataset.key;
 GoogleMapsLoader.LIBRARIES = ['geometry'];
 
 if (elmDiv) {
-  const flags = {
-    activities: JSON.parse(elmDiv.dataset.activities)
-  };
-  console.log("Flags:", flags)
-  const app = Elm.Main.embed(elmDiv, flags);
+  GoogleMapsLoader.load(function(google) {
+    const flags = {
+      activities: JSON.parse(elmDiv.dataset.activities)
+    };
+    console.log("Flags:", flags)
+    const app = Elm.Main.embed(elmDiv, flags);
+    let map, paths;
 
-  app.ports.loadMap.subscribe(()=> {
-    const mapDiv = document.getElementById("map");
+    const resetZoom = ()=> {
+      const bounds = new google.maps.LatLngBounds();
+      paths.forEach(path=>path.forEach(point=>bounds.extend(point)));
+      map.fitBounds(bounds);
+    };
 
-    GoogleMapsLoader.load(function(google) {
-      const map = new google.maps.Map(mapDiv,  { styles: gMapStyle });
+    app.ports.loadMap.subscribe(()=> {
+      const mapDiv = document.getElementById("map");
 
-      const paths = flags.activities.map(a=>google.maps.geometry.encoding.decodePath(a.map.summary_polyline));
+      map = new google.maps.Map(mapDiv,  { styles: gMapStyle });
+
+      paths = flags.activities.map(a=>google.maps.geometry.encoding.decodePath(a.map.summary_polyline));
 
       paths.map(path=> new google.maps.Polyline({
         path,
         strokeColor: 'red'
       })).forEach(p=>p.setMap(map));
 
+      resetZoom();
+    });
+    app.ports.zoomActivity.subscribe((activity)=> {
       const bounds = new google.maps.LatLngBounds();
-      paths.forEach(path=>path.forEach(point=>bounds.extend(point)));
+      const path = google.maps.geometry.encoding.decodePath(activity.map.summary_polyline);
+      path.forEach(point=>bounds.extend(point));
       map.fitBounds(bounds);
     });
+    app.ports.resetZoom.subscribe(resetZoom);
   });
 }

@@ -1,6 +1,7 @@
 port module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 
 main =
     Html.programWithFlags
@@ -18,6 +19,11 @@ type alias Model =
 type alias Activity =
     { id: Int
     , name: String
+    , map: Map
+    }
+
+type alias Map =
+    { summary_polyline: String
     }
 
 
@@ -33,11 +39,15 @@ init flags =
 
 -- UPDATE
 
-type Msg = Submit
+type Msg = ZoomActivity Activity | ResetZoom
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    (model, Cmd.none)
+    case msg of
+        ZoomActivity activity ->
+            (model, zoomActivity activity)
+        ResetZoom ->
+            (model, resetZoom ())
 
 
 -- SUBSCRIPTIONS
@@ -61,9 +71,13 @@ view model =
 viewActivity : Activity -> Html Msg
 viewActivity activity =
     li []
-        [ a [ href ("https://www.strava.com/activities/" ++ (toString activity.id)) ]
+        [ a [ href ("https://www.strava.com/activities/" ++ (toString activity.id))
+            , onMouseOver (ZoomActivity activity)
+            , onMouseOut ResetZoom]
             [ text activity.name ]
         ]
 
 
 port loadMap : () -> Cmd msg
+port zoomActivity : Activity -> Cmd msg
+port resetZoom : () -> Cmd msg
