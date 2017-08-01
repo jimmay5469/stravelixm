@@ -1,1 +1,2 @@
 <div id="elm-target" data-activities="<%= Poison.encode!(@activities) %>"></div>
+<div id="map" style="height: 500px;" data-key="<%= Application.get_env(:stravelixm, :google_api_key) %>"></div>

@@ -9,7 +9,8 @@ use Mix.Config
 config :stravelixm,
   ecto_repos: [Stravelixm.Repo],
   strava_client_id: System.get_env("STRAVA_CLIENT_ID"),
-  strava_client_secret: System.get_env("STRAVA_CLIENT_SECRET")
+  strava_client_secret: System.get_env("STRAVA_CLIENT_SECRET"),
+  google_api_key: System.get_env("GOOGLE_API_KEY")
 
 # Configures the endpoint
 config :stravelixm, Stravelixm.Endpoint,
