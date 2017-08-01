@@ -23,7 +23,7 @@ type alias Activity =
     }
 
 type alias Map =
-    { summary_polyline: String
+    { summary_polyline: Maybe String
     }
 
 
@@ -34,7 +34,7 @@ type alias Flags =
 init : Flags -> (Model, Cmd Msg)
 init flags =
     ({ activities = flags.activities }
-    , loadMap ())
+    , loadMap flags.activities)
 
 
 -- UPDATE
@@ -78,6 +78,6 @@ viewActivity activity =
         ]
 
 
-port loadMap : () -> Cmd msg
+port loadMap : List Activity -> Cmd msg
 port zoomActivity : Activity -> Cmd msg
 port resetZoom : () -> Cmd msg

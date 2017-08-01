@@ -195,29 +195,29 @@ if (elmDiv) {
     };
     console.log("Flags:", flags)
     const app = Elm.Main.embed(elmDiv, flags);
-    let map, paths;
 
+    let map, paths;
     const resetZoom = ()=> {
       const bounds = new google.maps.LatLngBounds();
       paths.forEach(path=>path.forEach(point=>bounds.extend(point)));
       map.fitBounds(bounds);
     };
-
-    app.ports.loadMap.subscribe(()=> {
+    app.ports.loadMap.subscribe((activities)=> {
       const mapDiv = document.getElementById("map");
-
       map = new google.maps.Map(mapDiv,  { styles: gMapStyle });
-
-      paths = flags.activities.map(a=>google.maps.geometry.encoding.decodePath(a.map.summary_polyline));
-
+      paths = activities
+        .filter(p=>p.map.summary_polyline)
+        .map(a=>google.maps.geometry.encoding.decodePath(a.map.summary_polyline));
       paths.map(path=> new google.maps.Polyline({
         path,
         strokeColor: 'red'
       })).forEach(p=>p.setMap(map));
-
       resetZoom();
     });
     app.ports.zoomActivity.subscribe((activity)=> {
+      if (!activity.map.summary_polyline) {
+        return;
+      }
       const bounds = new google.maps.LatLngBounds();
       const path = google.maps.geometry.encoding.decodePath(activity.map.summary_polyline);
       path.forEach(point=>bounds.extend(point));
