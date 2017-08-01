@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
@@ -28,7 +28,7 @@ type alias Flags =
 init : Flags -> (Model, Cmd Msg)
 init flags =
     ({ activities = flags.activities }
-    , Cmd.none)
+    , loadMap ())
 
 
 -- UPDATE
@@ -50,7 +50,13 @@ subscriptions model =
 -- VIEW
 view : Model -> Html Msg
 view model =
-    ul [] (List.map viewActivity model.activities)
+    div []
+    [ ul [] (List.map viewActivity model.activities)
+    , div
+        [ id "map"
+        , style [("height", "500px")]
+        ] []
+    ]
 
 viewActivity : Activity -> Html Msg
 viewActivity activity =
@@ -58,3 +64,6 @@ viewActivity activity =
         [ a [ href ("https://www.strava.com/activities/" ++ (toString activity.id)) ]
             [ text activity.name ]
         ]
+
+
+port loadMap : () -> Cmd msg

@@ -185,21 +185,32 @@ const gMapStyle = [
 ];
 
 const elmDiv = document.getElementById("elm-target");
-const mapDiv = document.getElementById("map");
-GoogleMapsLoader.KEY = mapDiv.dataset.key;
+GoogleMapsLoader.KEY = elmDiv.dataset.key;
+GoogleMapsLoader.LIBRARIES = ['geometry'];
 
 if (elmDiv) {
   const flags = {
     activities: JSON.parse(elmDiv.dataset.activities)
   };
   console.log("Flags:", flags)
-  Elm.Main.embed(elmDiv, flags);
+  const app = Elm.Main.embed(elmDiv, flags);
 
-  GoogleMapsLoader.load(function(google) {
-    const map = new google.maps.Map(mapDiv,  {
-      center: {lat: 39.1, lng: -84.5},
-      zoom: 12,
-      styles: gMapStyle
+  app.ports.loadMap.subscribe(()=> {
+    const mapDiv = document.getElementById("map");
+
+    GoogleMapsLoader.load(function(google) {
+      const map = new google.maps.Map(mapDiv,  { styles: gMapStyle });
+
+      const paths = flags.activities.map(a=>google.maps.geometry.encoding.decodePath(a.map.summary_polyline));
+
+      paths.map(path=> new google.maps.Polyline({
+        path,
+        strokeColor: 'red'
+      })).forEach(p=>p.setMap(map));
+
+      const bounds = new google.maps.LatLngBounds();
+      paths.forEach(path=>path.forEach(point=>bounds.extend(point)));
+      map.fitBounds(bounds);
     });
   });
 }
