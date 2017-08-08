@@ -196,23 +196,48 @@ if (elmDiv) {
     console.log("Flags:", flags)
     const app = Elm.Main.embed(elmDiv, flags);
 
-    let map, paths;
+    let map, mappedActivities;
     const resetZoom = ()=> {
       const bounds = new google.maps.LatLngBounds();
-      paths.forEach(path=>path.forEach(point=>bounds.extend(point)));
+      mappedActivities.forEach(ma=>ma.path.forEach(point=>bounds.extend(point)));
       map.fitBounds(bounds);
     };
     app.ports.loadMap.subscribe((activities)=> {
       const mapDiv = document.getElementById("map");
       map = new google.maps.Map(mapDiv,  { styles: gMapStyle });
-      paths = activities
-        .filter(p=>p.map.summary_polyline)
-        .map(a=>google.maps.geometry.encoding.decodePath(a.map.summary_polyline));
-      paths.map(path=> new google.maps.Polyline({
-        path,
-        strokeColor: 'red'
-      })).forEach(p=>p.setMap(map));
+      mappedActivities = activities
+        .filter(a=>a.map.summary_polyline)
+        .map(activity=> {
+          const path = google.maps.geometry.encoding.decodePath(activity.map.summary_polyline);
+          const polyline = new google.maps.Polyline({
+            path,
+            strokeColor: 'red',
+            strokeWeight: 2
+          });
+          return { activity, path, polyline };
+        });
+      mappedActivities.forEach(ma=>ma.polyline.setMap(map));
       resetZoom();
+    });
+    app.ports.highlightActivity.subscribe((activity)=> {
+      mappedActivities.forEach(ma=> {
+        if (ma.activity.id === activity.id) {
+          ma.polyline.setOptions({
+            strokeWeight: 5
+          })
+        } else {
+          ma.polyline.setOptions({
+            strokeWeight: 2
+          })
+        }
+      });
+    });
+    app.ports.resetHighlight.subscribe(()=> {
+      mappedActivities.forEach(ma=> {
+        ma.polyline.setOptions({
+          strokeWeight: 2
+        })
+      });
     });
     app.ports.zoomActivity.subscribe((activity)=> {
       if (!activity.map.summary_polyline) {

@@ -46,15 +46,15 @@ init flags =
 
 -- UPDATE
 
-type Msg = ZoomActivity Activity | ResetZoom
+type Msg = HoverActivity Activity | UnhoverActivity
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        ZoomActivity activity ->
-            (model, zoomActivity activity)
-        ResetZoom ->
-            (model, resetZoom ())
+        HoverActivity activity ->
+            (model, highlightActivity activity)
+        UnhoverActivity ->
+            (model, resetHighlight ())
 
 
 -- SUBSCRIPTIONS
@@ -99,8 +99,8 @@ viewActivity : Activity -> Html Msg
 viewActivity activity =
     li []
         [ a [ href ("https://www.strava.com/activities/" ++ (toString activity.id))
-            , onMouseOver (ZoomActivity activity)
-            , onMouseOut ResetZoom]
+            , onMouseOver (HoverActivity activity)
+            , onMouseOut UnhoverActivity]
             [ text activity.name ]
         , text " ("
         , a [ href ("https://www.strava.com/athletes/" ++ (toString activity.athlete.id)) ]
@@ -110,5 +110,7 @@ viewActivity activity =
 
 
 port loadMap : List Activity -> Cmd msg
+port highlightActivity : Activity -> Cmd msg
+port resetHighlight : () -> Cmd msg
 port zoomActivity : Activity -> Cmd msg
 port resetZoom : () -> Cmd msg
