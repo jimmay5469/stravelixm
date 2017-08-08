@@ -46,7 +46,7 @@ init flags =
 
 -- UPDATE
 
-type Msg = ClickActivity Activity | HoverActivity Activity | UnhoverActivity
+type Msg = ClickActivity Activity | HoverActivity Activity | UnhoverActivity ()
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -55,7 +55,7 @@ update msg model =
             (model, zoomActivity activity)
         HoverActivity activity ->
             (model, highlightActivity activity)
-        UnhoverActivity ->
+        UnhoverActivity na ->
             (model, resetHighlight ())
 
 
@@ -63,7 +63,11 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.batch
+        [ clickActivity ClickActivity
+        , hoverActivity HoverActivity
+        , unhoverActivity UnhoverActivity
+        ]
 
 
 -- VIEW
@@ -104,7 +108,7 @@ viewActivity activity =
         [ a [ style [("cursor", "pointer")]
             , onClick (ClickActivity activity)
             , onMouseOver (HoverActivity activity)
-            , onMouseOut UnhoverActivity]
+            , onMouseOut (UnhoverActivity ())]
             [ text activity.name ]
         , text " ("
         , text (activity.athlete.firstname ++ " " ++ activity.athlete.lastname)
@@ -117,3 +121,7 @@ port highlightActivity : Activity -> Cmd msg
 port resetHighlight : () -> Cmd msg
 port zoomActivity : Activity -> Cmd msg
 port resetZoom : () -> Cmd msg
+
+port clickActivity : (Activity -> msg) -> Sub msg
+port hoverActivity : (Activity -> msg) -> Sub msg
+port unhoverActivity : (() -> msg) -> Sub msg

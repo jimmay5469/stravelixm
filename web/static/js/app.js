@@ -217,7 +217,8 @@ if (elmDiv) {
       });
       miniMapWindow = new google.maps.InfoWindow({
         disableAutoPan: true,
-        content: miniMapDiv
+        content: miniMapDiv,
+        pixelOffset: new google.maps.Size(0, -5)
       });
 
       mappedActivities = activities
@@ -233,6 +234,15 @@ if (elmDiv) {
             path,
             strokeColor: "red",
             strokeWeight: 2
+          });
+          polyline.addListener('click', ()=> {
+            app.ports.clickActivity.send(activity);
+          });
+          polyline.addListener('mouseover', ()=> {
+            app.ports.hoverActivity.send(activity);
+          });
+          polyline.addListener('mouseout', ()=> {
+            app.ports.unhoverActivity.send(null);
           });
           return { activity, path, polyline, miniMapPolyline };
         });
@@ -296,6 +306,7 @@ if (elmDiv) {
       const path = google.maps.geometry.encoding.decodePath(activity.map.summary_polyline);
       path.forEach(point=>bounds.extend(point));
       map.fitBounds(bounds);
+      miniMapWindow.close();
     });
     app.ports.resetZoom.subscribe(resetZoom);
   });
