@@ -186,7 +186,7 @@ const gMapStyle = [
 
 const elmDiv = document.getElementById("elm-target");
 GoogleMapsLoader.KEY = elmDiv.dataset.key;
-GoogleMapsLoader.LIBRARIES = ['geometry'];
+GoogleMapsLoader.LIBRARIES = ["geometry"];
 
 if (elmDiv) {
   GoogleMapsLoader.load(function(google) {
@@ -196,7 +196,7 @@ if (elmDiv) {
     console.log("Flags:", flags)
     const app = Elm.Main.embed(elmDiv, flags);
 
-    let map, mappedActivities;
+    let map, mappedActivities, miniMap, miniMapWindow;
     const resetZoom = ()=> {
       const bounds = new google.maps.LatLngBounds();
       mappedActivities.forEach(ma=>ma.path.forEach(point=>bounds.extend(point)));
@@ -204,29 +204,74 @@ if (elmDiv) {
     };
     app.ports.loadMap.subscribe((activities)=> {
       const mapDiv = document.getElementById("map");
+      const miniMapDiv = document.getElementById("miniMap");
+
       map = new google.maps.Map(mapDiv,  { styles: gMapStyle });
+      miniMap = new google.maps.Map(miniMapDiv,  {
+        disableDefaultUI: true,
+        disableDoubleClickZoom: true,
+        draggable: false,
+        keyboardShortcuts: false,
+        scrollwheel: false,
+        styles: gMapStyle
+      });
+      miniMapWindow = new google.maps.InfoWindow({
+        disableAutoPan: true,
+        content: miniMapDiv
+      });
+
       mappedActivities = activities
         .filter(a=>a.map.summary_polyline)
         .map(activity=> {
           const path = google.maps.geometry.encoding.decodePath(activity.map.summary_polyline);
           const polyline = new google.maps.Polyline({
             path,
-            strokeColor: 'red',
+            strokeColor: "red",
             strokeWeight: 2
           });
-          return { activity, path, polyline };
+          const miniMapPolyline = new google.maps.Polyline({
+            path,
+            strokeColor: "red",
+            strokeWeight: 2
+          });
+          return { activity, path, polyline, miniMapPolyline };
         });
       mappedActivities.forEach(ma=>ma.polyline.setMap(map));
+      mappedActivities.forEach(ma=>ma.miniMapPolyline.setMap(miniMap));
       resetZoom();
     });
     app.ports.highlightActivity.subscribe((activity)=> {
+      if (!activity.map.summary_polyline) {
+        return;
+      }
       mappedActivities.forEach(ma=> {
         if (ma.activity.id === activity.id) {
           ma.polyline.setOptions({
             strokeWeight: 5
           })
+          ma.miniMapPolyline.setOptions({
+            strokeWeight: 5
+          })
+
+          const bounds = new google.maps.LatLngBounds();
+          ma.path.forEach(point=>bounds.extend(point));
+
+          const ne = map.getProjection().fromLatLngToPoint(bounds.getNorthEast());
+          const sw = map.getProjection().fromLatLngToPoint(bounds.getSouthWest());
+          const distance = Math.sqrt(Math.pow(ne.x - sw.x, 2) + Math.pow(ne.y - sw.y, 2));
+          const scale = 1 << map.getZoom();
+          const boundsPixelSize = distance * scale;
+
+          if (boundsPixelSize < 30) {
+            miniMapWindow.open(map);
+            miniMap.fitBounds(bounds);
+            miniMapWindow.setPosition(ma.path[0]);
+          }
         } else {
           ma.polyline.setOptions({
+            strokeWeight: 2
+          })
+          ma.miniMapPolyline.setOptions({
             strokeWeight: 2
           })
         }
@@ -237,7 +282,11 @@ if (elmDiv) {
         ma.polyline.setOptions({
           strokeWeight: 2
         })
+        ma.miniMapPolyline.setOptions({
+          strokeWeight: 2
+        })
       });
+      miniMapWindow.close();
     });
     app.ports.zoomActivity.subscribe((activity)=> {
       if (!activity.map.summary_polyline) {

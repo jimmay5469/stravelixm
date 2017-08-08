@@ -80,6 +80,7 @@ view model =
                 , ("overflow-y", "auto")
                 ]
         ] (List.map viewActivity model.activities)
+    , div [ id "miniMap", style [("width", "400px"), ("height", "300px")] ] []
     , div
         [ id "mapContainer"
         , style [ ("position", "fixed")
