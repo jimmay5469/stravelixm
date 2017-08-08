@@ -19,7 +19,14 @@ type alias Model =
 type alias Activity =
     { id: Int
     , name: String
+    , athlete: Athlete
     , map: Map
+    }
+
+type alias Athlete =
+    { id: Int
+    , lastname: String
+    , firstname: String
     }
 
 type alias Map =
@@ -61,11 +68,31 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-    [ ul [] (List.map viewActivity model.activities)
+    [ ul
+        [ style [ ("position", "fixed")
+                , ("top", "110px")
+                , ("bottom", "20px")
+                , ("left", "20px")
+                , ("width", "310px")
+                , ("overflow-x", "hidden")
+                , ("overflow-y", "auto")
+                ]
+        ] (List.map viewActivity model.activities)
     , div
-        [ id "map"
-        , style [("height", "500px")]
-        ] []
+        [ id "mapContainer"
+        , style [ ("position", "fixed")
+                , ("top", "110px")
+                , ("bottom", "20px")
+                , ("left", "350px")
+                , ("right", "20px")
+                ]
+        ] [ div
+            [ id "map"
+            , style [ ("width", "100%")
+                    , ("height", "100%")
+                    ]
+            ] []
+        ]
     ]
 
 viewActivity : Activity -> Html Msg
@@ -75,6 +102,10 @@ viewActivity activity =
             , onMouseOver (ZoomActivity activity)
             , onMouseOut ResetZoom]
             [ text activity.name ]
+        , text " ("
+        , a [ href ("https://www.strava.com/athletes/" ++ (toString activity.athlete.id)) ]
+            [ text (activity.athlete.firstname ++ " " ++ activity.athlete.lastname) ]
+        , text ")"
         ]
 
 

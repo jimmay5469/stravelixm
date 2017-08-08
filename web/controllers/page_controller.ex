@@ -5,7 +5,7 @@ defmodule Stravelixm.PageController do
     activities = []
     if strava = get_session(conn, :strava) do
       {:ok, response} = HTTPoison.get(
-        "https://www.strava.com/api/v3/athlete/activities",
+        "https://www.strava.com/api/v3/activities/following",
         [Authorization: "Bearer #{strava["access_token"]}"]
       )
       activities = Poison.decode!(response.body)
