@@ -46,7 +46,7 @@ init flags =
 
 -- UPDATE
 
-type Msg = ClickActivity Activity | HoverActivity Activity | UnhoverActivity ()
+type Msg = ClickActivity Activity | HoverActivity Activity | UnhoverActivity () | ZoomFit
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -57,6 +57,8 @@ update msg model =
             (model, highlightActivity activity)
         UnhoverActivity na ->
             (model, resetHighlight ())
+        ZoomFit ->
+            (model, resetZoom ())
 
 
 -- SUBSCRIPTIONS
@@ -84,6 +86,14 @@ view model =
                 , ("overflow-y", "auto")
                 ]
         ] (List.map viewActivity model.activities)
+    , button
+        [ onClick (ZoomFit)
+        , style [ ("position", "fixed")
+                , ("top", "115px")
+                , ("right", "25px")
+                , ("z-index", "1")
+                ]
+        ] [ text "Zoom Fit" ]
     , div [ id "miniMap", style [("width", "400px"), ("height", "300px")] ] []
     , div
         [ id "mapContainer"
