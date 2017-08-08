@@ -14,7 +14,8 @@ main =
 
 -- MODEL
 type alias Model =
-    { activities: List Activity }
+    { activities: List Activity
+    , hoveredActivity: Maybe Activity }
 
 type alias Activity =
     { id: Int
@@ -40,7 +41,7 @@ type alias Flags =
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
-    ({ activities = flags.activities }
+    ({ activities = flags.activities, hoveredActivity = Nothing }
     , loadMap flags.activities)
 
 
@@ -54,9 +55,9 @@ update msg model =
         ClickActivity activity ->
             (model, zoomActivity activity)
         HoverActivity activity ->
-            (model, highlightActivity activity)
+            ({ model | hoveredActivity = Just activity }, highlightActivity activity)
         UnhoverActivity na ->
-            (model, resetHighlight ())
+            ({ model | hoveredActivity = Nothing }, resetHighlight ())
         ZoomFit ->
             (model, resetZoom ())
 
@@ -85,7 +86,7 @@ view model =
                 , ("overflow-x", "hidden")
                 , ("overflow-y", "auto")
                 ]
-        ] (List.map viewActivity model.activities)
+        ] (List.map (viewActivity model) model.activities)
     , button
         [ onClick (ZoomFit)
         , style [ ("position", "fixed")
@@ -112,10 +113,10 @@ view model =
         ]
     ]
 
-viewActivity : Activity -> Html Msg
-viewActivity activity =
+viewActivity : Model -> Activity -> Html Msg
+viewActivity model activity =
     li []
-        [ a [ style [("cursor", "pointer")]
+        [ a [ style (activityStyle model activity)
             , onClick (ClickActivity activity)
             , onMouseOver (HoverActivity activity)
             , onMouseOut (UnhoverActivity ())]
@@ -124,6 +125,19 @@ viewActivity activity =
         , text (activity.athlete.firstname ++ " " ++ activity.athlete.lastname)
         , text ")"
         ]
+
+activityStyle : Model -> Activity -> List (String, String)
+activityStyle model activity =
+    if isHovered model activity then
+        [("cursor", "pointer"), ("text-decoration", "underline"), ("color", "red")]
+    else
+        [("cursor", "pointer")]
+
+isHovered : Model -> Activity -> Bool
+isHovered model activity =
+    case model.hoveredActivity of
+        Just hoveredActivity -> hoveredActivity == activity
+        Nothing -> False
 
 
 port loadMap : List Activity -> Cmd msg
