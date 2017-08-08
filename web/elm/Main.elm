@@ -46,11 +46,13 @@ init flags =
 
 -- UPDATE
 
-type Msg = HoverActivity Activity | UnhoverActivity
+type Msg = ClickActivity Activity | HoverActivity Activity | UnhoverActivity
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
+        ClickActivity activity ->
+            (model, zoomActivity activity)
         HoverActivity activity ->
             (model, highlightActivity activity)
         UnhoverActivity ->
@@ -98,13 +100,13 @@ view model =
 viewActivity : Activity -> Html Msg
 viewActivity activity =
     li []
-        [ a [ href ("https://www.strava.com/activities/" ++ (toString activity.id))
+        [ a [ style [("cursor", "pointer")]
+            , onClick (ClickActivity activity)
             , onMouseOver (HoverActivity activity)
             , onMouseOut UnhoverActivity]
             [ text activity.name ]
         , text " ("
-        , a [ href ("https://www.strava.com/athletes/" ++ (toString activity.athlete.id)) ]
-            [ text (activity.athlete.firstname ++ " " ++ activity.athlete.lastname) ]
+        , text (activity.athlete.firstname ++ " " ++ activity.athlete.lastname)
         , text ")"
         ]
 
