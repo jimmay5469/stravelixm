@@ -57,6 +57,7 @@ exports.config = {
       ignore: [/web\/static\/vendor/]
     },
     elmBrunch: {
+      executablePath: '../../node_modules/elm/binwrappers',
       elmFolder: "web/elm",
       mainModules: ["Main.elm"],
       outputFolder: "../static/js"
