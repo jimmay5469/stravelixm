@@ -13,6 +13,7 @@ main =
 
 
 -- MODEL
+
 type alias Model =
     { activities: List Activity
     , hoveredActivity: Maybe Activity }
@@ -36,6 +37,7 @@ type alias Map =
 
 
 -- INIT
+
 type alias Flags =
     { activities: List Activity }
 
@@ -73,7 +75,21 @@ subscriptions model =
         ]
 
 
+-- PORTS
+
+port loadMap : List Activity -> Cmd msg
+port highlightActivity : Activity -> Cmd msg
+port resetHighlight : () -> Cmd msg
+port zoomActivity : Activity -> Cmd msg
+port resetZoom : () -> Cmd msg
+
+port clickActivity : (Activity -> msg) -> Sub msg
+port hoverActivity : (Activity -> msg) -> Sub msg
+port unhoverActivity : (() -> msg) -> Sub msg
+
+
 -- VIEW
+
 view : Model -> Html Msg
 view model =
     div []
@@ -138,14 +154,3 @@ isHovered model activity =
     case model.hoveredActivity of
         Just hoveredActivity -> hoveredActivity == activity
         Nothing -> False
-
-
-port loadMap : List Activity -> Cmd msg
-port highlightActivity : Activity -> Cmd msg
-port resetHighlight : () -> Cmd msg
-port zoomActivity : Activity -> Cmd msg
-port resetZoom : () -> Cmd msg
-
-port clickActivity : (Activity -> msg) -> Sub msg
-port hoverActivity : (Activity -> msg) -> Sub msg
-port unhoverActivity : (() -> msg) -> Sub msg
