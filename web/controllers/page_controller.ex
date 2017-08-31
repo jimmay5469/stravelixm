@@ -18,12 +18,14 @@ defmodule Stravelixm.PageController do
       "https://www.strava.com/oauth/token",
       {:form, [client_id: Application.get_env(:stravelixm, :strava_client_id), client_secret: Application.get_env(:stravelixm, :strava_client_secret), code: code]}
     )
-    conn = put_session(conn, :strava, Poison.decode!(response.body))
-    redirect(conn, to: "/")
+    conn
+    |> put_session(:strava, Poison.decode!(response.body))
+    |> redirect(to: "/")
   end
 
   def logout(conn, _params) do
-    conn = configure_session(conn, drop: true)
-    redirect(conn, to: "/")
+    conn
+    |> configure_session(drop: true)
+    |> redirect(to: "/")
   end
 end
