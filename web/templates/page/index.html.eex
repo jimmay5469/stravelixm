@@ -1,5 +1,8 @@
 <div
   id="elm-target"
+  data-login-link="https://www.strava.com/oauth/authorize?client_id=<%= Application.get_env(:stravelixm, :strava_client_id) %>&response_type=code&redirect_uri=<%= Stravelixm.Router.Helpers.url(@conn) %>/token_exchange&scope=view_private,write&approval_prompt=force"
+  data-logout-link="<%= page_path(@conn, :logout) %>"
+  data-athlete="<%= Poison.encode!(Plug.Conn.get_session(@conn, :strava)["athlete"]) %>"
   data-activities="<%= Poison.encode!(@activities) %>"
-  data-key="<%= Application.get_env(:stravelixm, :google_api_key) %>"
+  data-google-api-key="<%= Application.get_env(:stravelixm, :google_api_key) %>"
 ></div>

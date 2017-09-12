@@ -15,7 +15,10 @@ main =
 -- MODEL
 
 type alias Model =
-    { activities: List Activity
+    { loginLink: String
+    , logoutLink: String
+    , athlete: Maybe Athlete
+    , activities: List Activity
     , hoveredActivity: Maybe Activity }
 
 type alias Activity =
@@ -32,19 +35,22 @@ type alias Athlete =
     }
 
 type alias Map =
-    { summary_polyline: Maybe String
+    { summaryPolyline: Maybe String
     }
 
 
 -- INIT
 
 type alias Flags =
-    { activities: List Activity }
+    { loginLink: String
+    , logoutLink: String
+    , athlete: Maybe Athlete
+    , activities: List Activity
+    }
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
-    ({ activities = flags.activities, hoveredActivity = Nothing }
-    , loadMap flags.activities)
+    (Model flags.loginLink flags.logoutLink flags.athlete flags.activities Nothing, loadMap flags.activities)
 
 
 -- UPDATE
@@ -93,7 +99,8 @@ port unhoverActivity : (() -> msg) -> Sub msg
 view : Model -> Html Msg
 view model =
     div []
-    [ ul
+    [ viewHeader model
+    , ul
         [ style [ ("position", "fixed")
                 , ("top", "110px")
                 , ("bottom", "20px")
@@ -129,6 +136,31 @@ view model =
         ]
     ]
 
+viewHeader : Model -> Html Msg
+viewHeader model =
+    div [ style [ ("position", "fixed")
+                , ("top", "0px")
+                , ("left", "0px")
+                ]
+        ]
+    [ h1 [][ text "Stravelixm" ]
+    , viewGreeting model
+    ]
+
+viewGreeting : Model -> Html Msg
+viewGreeting model =
+    case model.athlete of
+        Nothing -> a [ href model.loginLink ][ text "Login" ]
+        Just athlete ->
+            case athlete.firstname of
+                Nothing -> a [ href model.logoutLink ][ text "Logout" ]
+                Just firstname ->
+                    span []
+                      [ text ("Hi " ++ firstname ++ "! (")
+                      , a [ href model.logoutLink ][ text "logout" ]
+                      , text ")"
+                      ]
+
 viewActivity : Model -> Activity -> Html Msg
 viewActivity model activity =
     li []
@@ -142,15 +174,9 @@ viewActivity model activity =
 
 viewActivityAthlete : Athlete -> Html Msg
 viewActivityAthlete athlete =
-    case (athleteName athlete) of
-        Nothing -> text ""
-        Just name -> text (" (" ++ name ++ ")")
-
-athleteName : Athlete -> Maybe String
-athleteName athlete =
     case (athlete.firstname, athlete.lastname) of
-        (Just firstname, Just lastname) -> Just (firstname ++ " " ++ lastname)
-        (_, _) -> Nothing
+        (Just firstname, Just lastname) -> text (" (" ++ firstname ++ " " ++ lastname ++ ")")
+        (_, _) -> text ""
 
 activityStyle : Model -> Activity -> List (String, String)
 activityStyle model activity =

@@ -13,24 +13,6 @@
 
   <body>
     <div class="container">
-      <header class="header">
-        <nav role="navigation">
-          <ul class="nav nav-pills pull-right">
-            <li>
-              <%= if strava = Plug.Conn.get_session(@conn, :strava) do %>
-                Hi <%= strava["athlete"]["firstname"] %>!
-                (<a href="<%= page_path(@conn, :logout) %>">logout</a>)
-              <% else %>
-                <a href="https://www.strava.com/oauth/authorize?client_id=<%= Application.get_env(:stravelixm, :strava_client_id) %>&response_type=code&redirect_uri=<%= Stravelixm.Router.Helpers.url(@conn) %>/token_exchange&scope=view_private,write&approval_prompt=force">Login</a>
-              <% end %>
-            </li>
-          </ul>
-        </nav>
-        <h1>Stravelixm</h1>
-      </header>
-
-      <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-      <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
 
       <main role="main">
         <%= render @view_module, @view_template, assigns %>

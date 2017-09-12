@@ -25,13 +25,24 @@ import GoogleMapsLoader from "google-maps";
 import GoogleMapStyle from "./google-map-style";
 
 const elmDiv = document.getElementById("elm-target");
-GoogleMapsLoader.KEY = elmDiv.dataset.key;
+GoogleMapsLoader.KEY = elmDiv.dataset.googleApiKey;
 GoogleMapsLoader.LIBRARIES = ["geometry"];
 
 if (elmDiv) {
   GoogleMapsLoader.load(function(google) {
+    const loginLink = elmDiv.dataset.loginLink;
+    const logoutLink = elmDiv.dataset.logoutLink;
+    const athlete = JSON.parse(elmDiv.dataset.athlete);
+    const activities = JSON.parse(elmDiv.dataset.activities) || [];
     const flags = {
-      activities: JSON.parse(elmDiv.dataset.activities).map((a)=>({
+      loginLink,
+      logoutLink,
+      athlete: !athlete ? null : {
+        id: athlete.id,
+        lastname: athlete.lastname || null,
+        firstname: athlete.firstname || null
+      },
+      activities: activities.map((a)=>({
         id: a.id,
         name: a.name,
         athlete: {
@@ -40,10 +51,14 @@ if (elmDiv) {
           firstname: a.athlete.firstname || null
         },
         map: {
-          summary_polyline: a.map.summary_polyline || null
+          summaryPolyline: a.map.summary_polyline || null
         }
       }))
     };
+    console.log("Login Link: ", loginLink);
+    console.log("Logout Link: ", logoutLink);
+    console.log("Athlete: ", athlete);
+    console.log("Activities: ", activities);
     console.log("Flags:", flags)
     const app = Elm.Main.embed(elmDiv, flags);
 
@@ -73,9 +88,9 @@ if (elmDiv) {
       });
 
       mappedActivities = activities
-        .filter(a=>a.map.summary_polyline)
+        .filter(a=>a.map.summaryPolyline)
         .map(activity=> {
-          const path = google.maps.geometry.encoding.decodePath(activity.map.summary_polyline);
+          const path = google.maps.geometry.encoding.decodePath(activity.map.summaryPolyline);
           const polyline = new google.maps.Polyline({
             path,
             strokeColor: "red",
@@ -102,7 +117,7 @@ if (elmDiv) {
       resetZoom();
     });
     app.ports.highlightActivity.subscribe((activity)=> {
-      if (!activity.map.summary_polyline) {
+      if (!activity.map.summaryPolyline) {
         return;
       }
       mappedActivities.forEach(ma=> {
@@ -150,11 +165,11 @@ if (elmDiv) {
       miniMapWindow.close();
     });
     app.ports.zoomActivity.subscribe((activity)=> {
-      if (!activity.map.summary_polyline) {
+      if (!activity.map.summaryPolyline) {
         return;
       }
       const bounds = new google.maps.LatLngBounds();
-      const path = google.maps.geometry.encoding.decodePath(activity.map.summary_polyline);
+      const path = google.maps.geometry.encoding.decodePath(activity.map.summaryPolyline);
       path.forEach(point=>bounds.extend(point));
       map.fitBounds(bounds);
       miniMapWindow.close();
