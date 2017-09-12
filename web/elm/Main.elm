@@ -27,8 +27,8 @@ type alias Activity =
 
 type alias Athlete =
     { id: Int
-    , lastname: String
-    , firstname: String
+    , lastname: Maybe String
+    , firstname: Maybe String
     }
 
 type alias Map =
@@ -137,10 +137,20 @@ viewActivity model activity =
             , onMouseOver (HoverActivity activity)
             , onMouseOut (UnhoverActivity ())]
             [ text activity.name ]
-        , text " ("
-        , text (activity.athlete.firstname ++ " " ++ activity.athlete.lastname)
-        , text ")"
+        , (viewActivityAthlete activity.athlete)
         ]
+
+viewActivityAthlete : Athlete -> Html Msg
+viewActivityAthlete athlete =
+    case (athleteName athlete) of
+        Nothing -> text ""
+        Just name -> text (" (" ++ name ++ ")")
+
+athleteName : Athlete -> Maybe String
+athleteName athlete =
+    case (athlete.firstname, athlete.lastname) of
+        (Just firstname, Just lastname) -> Just (firstname ++ " " ++ lastname)
+        (_, _) -> Nothing
 
 activityStyle : Model -> Activity -> List (String, String)
 activityStyle model activity =

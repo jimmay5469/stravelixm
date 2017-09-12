@@ -31,7 +31,18 @@ GoogleMapsLoader.LIBRARIES = ["geometry"];
 if (elmDiv) {
   GoogleMapsLoader.load(function(google) {
     const flags = {
-      activities: JSON.parse(elmDiv.dataset.activities)
+      activities: JSON.parse(elmDiv.dataset.activities).map((a)=>({
+        id: a.id,
+        name: a.name,
+        athlete: {
+          id: a.athlete.id,
+          lastname: a.athlete.lastname || null,
+          firstname: a.athlete.firstname || null
+        },
+        map: {
+          summary_polyline: a.map.summary_polyline || null
+        }
+      }))
     };
     console.log("Flags:", flags)
     const app = Elm.Main.embed(elmDiv, flags);

@@ -2,15 +2,15 @@ defmodule Stravelixm.PageController do
   use Stravelixm.Web, :controller
 
   def index(conn, _params) do
-    activities = []
-    if strava = get_session(conn, :strava) do
-      {:ok, response} = HTTPoison.get(
-        "https://www.strava.com/api/v3/activities/following",
-        [Authorization: "Bearer #{strava["access_token"]}"]
-      )
-      activities = Poison.decode!(response.body)
+    case get_session(conn, :strava) do
+      nil -> render conn, "index.html", activities: []
+      strava ->
+        {:ok, response} = HTTPoison.get(
+          "https://www.strava.com/api/v3/athlete/activities",
+          [Authorization: "Bearer #{strava["access_token"]}"]
+        )
+        render conn, "index.html", activities: Poison.decode!(response.body)
     end
-    render conn, "index.html", activities: activities
   end
 
   def token_exchange(conn, %{"code" => code}) do
