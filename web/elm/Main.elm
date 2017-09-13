@@ -19,7 +19,8 @@ type alias Model =
     , logoutLink: String
     , athlete: Maybe Athlete
     , activities: List Activity
-    , hoveredActivity: Maybe Activity }
+    , hoveredActivity: Maybe Activity
+    , selectedActivity: Maybe Activity }
 
 type alias Activity =
     { id: Int
@@ -50,7 +51,9 @@ type alias Flags =
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
-    (Model flags.loginLink flags.logoutLink flags.athlete flags.activities Nothing, loadMap flags.activities)
+    ( Model flags.loginLink flags.logoutLink flags.athlete flags.activities Nothing Nothing
+    , loadMap flags.activities
+    )
 
 
 -- UPDATE
@@ -61,9 +64,9 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         ZoomFit ->
-            (model, resetZoom ())
+            ({ model | selectedActivity = Nothing }, resetZoom ())
         ClickActivity activity ->
-            (model, zoomActivity activity)
+            ({ model | selectedActivity = Just activity }, zoomActivity activity)
         UnhoverActivity activity ->
             case model.hoveredActivity of
                 Nothing -> (model, Cmd.none)
@@ -72,7 +75,15 @@ update msg model =
                         False -> (model, Cmd.none)
                         True -> ({ model | hoveredActivity = Nothing }, resetHighlight ())
         HoverActivity activity ->
-            ({ model | hoveredActivity = Just activity }, highlightActivity activity)
+            case model.selectedActivity of
+                Nothing ->
+                    ({ model | hoveredActivity = Just activity }, highlightActivity activity)
+                Just selectedActivity ->
+                    case selectedActivity == activity of
+                        True ->
+                            ({ model | hoveredActivity = Just activity }, highlightActivity activity)
+                        False ->
+                            ({ model | hoveredActivity = Just activity, selectedActivity = Nothing }, highlightActivity activity)
 
 
 -- SUBSCRIPTIONS
