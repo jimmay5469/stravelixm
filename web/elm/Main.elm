@@ -55,19 +55,24 @@ init flags =
 
 -- UPDATE
 
-type Msg = ClickActivity Activity | HoverActivity Activity | UnhoverActivity () | ZoomFit
+type Msg = ClickActivity Activity | HoverActivity Activity | UnhoverActivity Activity | ZoomFit
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        ClickActivity activity ->
-            (model, zoomActivity activity)
-        HoverActivity activity ->
-            ({ model | hoveredActivity = Just activity }, highlightActivity activity)
-        UnhoverActivity na ->
-            ({ model | hoveredActivity = Nothing }, resetHighlight ())
         ZoomFit ->
             (model, resetZoom ())
+        ClickActivity activity ->
+            (model, zoomActivity activity)
+        UnhoverActivity activity ->
+            case model.hoveredActivity of
+                Nothing -> (model, Cmd.none)
+                Just hoveredActivity ->
+                    case hoveredActivity == activity of
+                        False -> (model, Cmd.none)
+                        True -> ({ model | hoveredActivity = Nothing }, resetHighlight ())
+        HoverActivity activity ->
+            ({ model | hoveredActivity = Just activity }, highlightActivity activity)
 
 
 -- SUBSCRIPTIONS
@@ -76,22 +81,22 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ clickActivity ClickActivity
-        , hoverActivity HoverActivity
         , unhoverActivity UnhoverActivity
+        , hoverActivity HoverActivity
         ]
 
 
 -- PORTS
 
 port loadMap : List Activity -> Cmd msg
-port highlightActivity : Activity -> Cmd msg
 port resetHighlight : () -> Cmd msg
-port zoomActivity : Activity -> Cmd msg
+port highlightActivity : Activity -> Cmd msg
 port resetZoom : () -> Cmd msg
+port zoomActivity : Activity -> Cmd msg
 
 port clickActivity : (Activity -> msg) -> Sub msg
+port unhoverActivity : (Activity -> msg) -> Sub msg
 port hoverActivity : (Activity -> msg) -> Sub msg
-port unhoverActivity : (() -> msg) -> Sub msg
 
 
 -- VIEW
@@ -107,9 +112,9 @@ view model =
             , ("right", "0")
             ]
         ]
-    [ div [ class "col-xs-2", style [("overflow", "scroll")] ]
+    [ div [ class "col-xs-5 col-sm-4 col-md-3 col-lg-2", style [("overflow", "scroll")] ]
         [ div [ class "row center-xs" ]
-            [ div [ class "col-xs-10" ]
+            [ div [ class "col-xs-11 col-md-10" ]
                 [ div [ class "row start-xs" ]
                     [ div [ class "col-xs-12"]
                         [ viewHeader model
@@ -123,7 +128,7 @@ view model =
                 ]
             ]
         ]
-    , div [ class "col-xs-10", style [("padding-left", "0")] ]
+    , div [ class "col-xs-7 col-sm-8 col-md-9 col-lg-10", style [("padding-left", "0")] ]
         [ div [ id "map", style [("width", "100%") , ("height", "100%")] ] []
         , div [ id "miniMap", style [("width", "400px"), ("height", "300px")] ] []
         ]
@@ -156,7 +161,7 @@ viewActivity model activity =
         [ a [ style (activityStyle model activity)
             , onClick (ClickActivity activity)
             , onMouseOver (HoverActivity activity)
-            , onMouseOut (UnhoverActivity ())
+            , onMouseOut (UnhoverActivity activity)
             ]
             [ text activity.name ]
         , (viewActivityAthlete activity.athlete)
