@@ -68,9 +68,9 @@ if (elmDiv) {
       if (mappedActivities && mappedActivities.length) {
         mappedActivities.forEach(ma=>ma.path.forEach(point=>bounds.extend(point)));
       } else {
-        bounds.extend(new google.maps.LatLng(45, -100));
-        bounds.extend(new google.maps.LatLng(0,0));
-        bounds.extend(new google.maps.LatLng(-25, 125));
+        bounds.extend(new google.maps.LatLng(10, -100));
+        bounds.extend(new google.maps.LatLng(10, 0));
+        bounds.extend(new google.maps.LatLng(10, 125));
       }
       map.fitBounds(bounds);
     };
