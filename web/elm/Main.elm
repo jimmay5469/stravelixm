@@ -98,54 +98,43 @@ port unhoverActivity : (() -> msg) -> Sub msg
 
 view : Model -> Html Msg
 view model =
-    div []
-    [ viewHeader model
-    , ul
-        [ style [ ("position", "fixed")
-                , ("top", "110px")
-                , ("bottom", "20px")
-                , ("left", "20px")
-                , ("width", "310px")
-                , ("overflow-x", "hidden")
-                , ("overflow-y", "auto")
-                ]
-        ] (List.map (viewActivity model) model.activities)
-    , button
-        [ onClick (ZoomFit)
-        , style [ ("position", "fixed")
-                , ("top", "115px")
-                , ("right", "25px")
-                , ("z-index", "1")
-                ]
-        ] [ text "Zoom Fit" ]
-    , div [ id "miniMap", style [("width", "400px"), ("height", "300px")] ] []
-    , div
-        [ id "mapContainer"
-        , style [ ("position", "fixed")
-                , ("top", "110px")
-                , ("bottom", "20px")
-                , ("left", "350px")
-                , ("right", "20px")
-                ]
-        ] [ div
-            [ id "map"
-            , style [ ("width", "100%")
-                    , ("height", "100%")
+    div [ class "row"
+        , style
+            [ ("position", "fixed")
+            , ("top", "0")
+            , ("bottom", "0")
+            , ("left", "0")
+            , ("right", "0")
+            ]
+        ]
+    [ div [ class "col-xs-2", style [("overflow", "scroll")] ]
+        [ div [ class "row center-xs" ]
+            [ div [ class "col-xs-10" ]
+                [ div [ class "row start-xs" ]
+                    [ div [ class "col-xs-12"]
+                        [ viewHeader model
+                        , button
+                            [ style [("cursor", "pointer")]
+                            , onClick (ZoomFit)
+                            ] [ text "Zoom Fit" ]
+                        , ul [] (List.map (viewActivity model) model.activities)
+                        ]
                     ]
-            ] []
+                ]
+            ]
+        ]
+    , div [ class "col-xs-10", style [("padding-left", "0")] ]
+        [ div [ id "map", style [("width", "100%") , ("height", "100%")] ] []
+        , div [ id "miniMap", style [("width", "400px"), ("height", "300px")] ] []
         ]
     ]
 
 viewHeader : Model -> Html Msg
 viewHeader model =
-    div [ style [ ("position", "fixed")
-                , ("top", "0px")
-                , ("left", "0px")
-                ]
+    div []
+        [ h1 [][ text "Stravelixm" ]
+        , viewGreeting model
         ]
-    [ h1 [][ text "Stravelixm" ]
-    , viewGreeting model
-    ]
 
 viewGreeting : Model -> Html Msg
 viewGreeting model =
@@ -167,7 +156,8 @@ viewActivity model activity =
         [ a [ style (activityStyle model activity)
             , onClick (ClickActivity activity)
             , onMouseOver (HoverActivity activity)
-            , onMouseOut (UnhoverActivity ())]
+            , onMouseOut (UnhoverActivity ())
+            ]
             [ text activity.name ]
         , (viewActivityAthlete activity.athlete)
         ]

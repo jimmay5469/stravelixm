@@ -8,17 +8,13 @@
     <meta name="author" content="">
 
     <title>Stravelixm</title>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css">
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
 
   <body>
-    <div class="container">
-
-      <main role="main">
-        <%= render @view_module, @view_template, assigns %>
-      </main>
-
-    </div> <!-- /container -->
+    <%= render @view_module, @view_template, assigns %>
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
   </body>
 </html>
