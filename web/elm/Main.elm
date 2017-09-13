@@ -112,7 +112,10 @@ view model =
             , ("right", "0")
             ]
         ]
-    [ div [ class "col-xs-5 col-sm-4 col-md-3 col-lg-2", style [("overflow", "scroll")] ]
+    [ div
+        [ class "col-xs-5 col-sm-4 col-md-3 col-lg-2"
+        , style [("overflow", "scroll"), ("height", "100vh")]
+        ]
         [ div [ class "row center-xs" ]
             [ div [ class "col-xs-11 col-md-10" ]
                 [ div [ class "row start-xs" ]
@@ -129,7 +132,7 @@ view model =
             ]
         ]
     , div [ class "col-xs-7 col-sm-8 col-md-9 col-lg-10", style [("padding-left", "0")] ]
-        [ div [ id "map", style [("width", "100%") , ("height", "100vh")] ] []
+        [ div [ id "map", style [("width", "100%"), ("height", "100vh")] ] []
         , div [ id "miniMap", style [("width", "400px"), ("height", "300px")] ] []
         ]
     ]
