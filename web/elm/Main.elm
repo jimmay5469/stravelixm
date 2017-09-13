@@ -129,7 +129,7 @@ view model =
             ]
         ]
     , div [ class "col-xs-7 col-sm-8 col-md-9 col-lg-10", style [("padding-left", "0")] ]
-        [ div [ id "map", style [("width", "100%") , ("height", "100%")] ] []
+        [ div [ id "map", style [("width", "100%") , ("height", "100vh")] ] []
         , div [ id "miniMap", style [("width", "400px"), ("height", "300px")] ] []
         ]
     ]
