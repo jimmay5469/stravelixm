@@ -73,11 +73,15 @@ update msg model =
         StopActivityPreview _ ->
             ({ model | previewedActivity = Nothing }, resetHighlight ())
         SelectActivity activity ->
-            ({ model | selectedActivity = Just activity }, zoomActivity activity)
+            ( { model | selectedActivity = Just activity, previewedActivity = Nothing }
+            , Cmd.batch [ zoomActivity activity, resetHighlight () ]
+            )
         DeselectActivity ->
             ({ model | selectedActivity = Nothing }, Cmd.none)
         Reset ->
-            ({ model | selectedActivity = Nothing, previewedActivity = Nothing }, resetZoom ())
+            ( { model | selectedActivity = Nothing, previewedActivity = Nothing }
+            , resetZoom ()
+            )
 
 
 -- SUBSCRIPTIONS
@@ -150,10 +154,17 @@ viewGreeting model =
 
 viewSidebarContent : Model -> Html Msg
 viewSidebarContent model =
-    div []
-        [ button [ onClick (Reset) ] [ text "Zoom Fit" ]
-        , ul [] (List.map (viewActivity model) model.activities)
-        ]
+    case model.selectedActivity of
+        Nothing ->
+            div []
+                [ button [ onClick Reset ] [ text "Zoom Fit" ]
+                , ul [] (List.map (viewActivity model) model.activities)
+                ]
+        Just activity ->
+            div []
+                [ button [ onClick DeselectActivity ] [ text "See All" ]
+                , div [] [ text activity.name ]
+                ]
 
 viewActivity : Model -> Activity -> Html Msg
 viewActivity model activity =
