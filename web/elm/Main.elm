@@ -125,7 +125,7 @@ view model =
 
 viewHeader : Model -> Html Msg
 viewHeader model =
-    div []
+    div [ id "header" ]
         [ h1 [][ text "Stravelixm" ]
         , viewGreeting model
         ]
