@@ -12,7 +12,7 @@ button, a {
   right: 0;
 }
 
-#sideBarContainer {
+#sidebarContainer {
   overflow: scroll;
   height: 100vh;
 }

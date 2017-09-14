@@ -58,7 +58,12 @@ init flags =
 
 -- UPDATE
 
-type Msg = StartActivityPreview Activity | StopActivityPreview () | SelectActivity Activity | DeselectActivity | Reset
+type Msg =
+    StartActivityPreview Activity
+    | StopActivityPreview ()
+    | SelectActivity Activity
+    | DeselectActivity
+    | Reset
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -104,14 +109,13 @@ port clickActivity : (Activity -> msg) -> Sub msg
 view : Model -> Html Msg
 view model =
     div [ id "elmContainer", class "row" ]
-        [ div [ id "sideBarContainer", class "col-xs-5 col-sm-4 col-md-3 col-lg-2" ]
+        [ div [ id "sidebarContainer", class "col-xs-5 col-sm-4 col-md-3 col-lg-2" ]
             [ div [ class "row center-xs" ]
                 [ div [ class "col-xs-11 col-md-10" ]
                     [ div [ class "row start-xs" ]
                         [ div [ class "col-xs-12"]
                             [ viewHeader model
-                            , button [ onClick (Reset) ] [ text "Zoom Fit" ]
-                            , ul [] (List.map (viewActivity model) model.activities)
+                            , viewSidebarContent model
                             ]
                         ]
                     ]
@@ -143,6 +147,13 @@ viewGreeting model =
                       , a [ href model.logoutLink ][ text "logout" ]
                       , text ")"
                       ]
+
+viewSidebarContent : Model -> Html Msg
+viewSidebarContent model =
+    div []
+        [ button [ onClick (Reset) ] [ text "Zoom Fit" ]
+        , ul [] (List.map (viewActivity model) model.activities)
+        ]
 
 viewActivity : Model -> Activity -> Html Msg
 viewActivity model activity =
