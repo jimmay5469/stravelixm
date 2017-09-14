@@ -114,7 +114,7 @@ if (elmDiv) {
             app.ports.hoverActivity.send(activity);
           });
           polyline.addListener('mouseout', ()=> {
-            app.ports.unhoverActivity.send(activity);
+            app.ports.unhoverActivity.send(null);
           });
           return { activity, path, polyline, miniMapPolyline };
         });

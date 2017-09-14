@@ -58,7 +58,7 @@ init flags =
 
 -- UPDATE
 
-type Msg = ClickActivity Activity | HoverActivity Activity | UnhoverActivity Activity | ZoomFit
+type Msg = ClickActivity Activity | HoverActivity Activity | UnhoverActivity () | ZoomFit
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -67,13 +67,8 @@ update msg model =
             ({ model | selectedActivity = Nothing }, resetZoom ())
         ClickActivity activity ->
             ({ model | selectedActivity = Just activity }, zoomActivity activity)
-        UnhoverActivity activity ->
-            case model.hoveredActivity of
-                Nothing -> (model, Cmd.none)
-                Just hoveredActivity ->
-                    case hoveredActivity == activity of
-                        False -> (model, Cmd.none)
-                        True -> ({ model | hoveredActivity = Nothing }, resetHighlight ())
+        UnhoverActivity _ ->
+            ({ model | hoveredActivity = Nothing }, resetHighlight ())
         HoverActivity activity ->
             case model.selectedActivity of
                 Nothing ->
@@ -106,7 +101,7 @@ port resetZoom : () -> Cmd msg
 port zoomActivity : Activity -> Cmd msg
 
 port clickActivity : (Activity -> msg) -> Sub msg
-port unhoverActivity : (Activity -> msg) -> Sub msg
+port unhoverActivity : (() -> msg) -> Sub msg
 port hoverActivity : (Activity -> msg) -> Sub msg
 
 
@@ -175,7 +170,7 @@ viewActivity model activity =
         [ a [ style (activityStyle model activity)
             , onClick (ClickActivity activity)
             , onMouseOver (HoverActivity activity)
-            , onMouseOut (UnhoverActivity activity)
+            , onMouseOut (UnhoverActivity ())
             ]
             [ text activity.name ]
         , (viewActivityAthlete activity.athlete)
