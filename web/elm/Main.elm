@@ -19,7 +19,7 @@ type alias Model =
     , logoutLink: String
     , athlete: Maybe Athlete
     , activities: List Activity
-    , hoveredActivity: Maybe Activity
+    , previewedActivity: Maybe Activity
     , selectedActivity: Maybe Activity }
 
 type alias Activity =
@@ -58,27 +58,19 @@ init flags =
 
 -- UPDATE
 
-type Msg = ClickActivity Activity | HoverActivity Activity | UnhoverActivity () | ZoomFit
+type Msg = StartActivityPreview Activity | StopActivityPreview () | SelectActivity Activity | DeselectActivity
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        ZoomFit ->
-            ({ model | selectedActivity = Nothing }, resetZoom ())
-        ClickActivity activity ->
+        StartActivityPreview activity ->
+            ({ model | previewedActivity = Just activity }, highlightActivity activity)
+        StopActivityPreview _ ->
+            ({ model | previewedActivity = Nothing }, resetHighlight ())
+        SelectActivity activity ->
             ({ model | selectedActivity = Just activity }, zoomActivity activity)
-        UnhoverActivity _ ->
-            ({ model | hoveredActivity = Nothing }, resetHighlight ())
-        HoverActivity activity ->
-            case model.selectedActivity of
-                Nothing ->
-                    ({ model | hoveredActivity = Just activity }, highlightActivity activity)
-                Just selectedActivity ->
-                    case selectedActivity == activity of
-                        True ->
-                            ({ model | hoveredActivity = Just activity }, highlightActivity activity)
-                        False ->
-                            ({ model | hoveredActivity = Just activity, selectedActivity = Nothing }, highlightActivity activity)
+        DeselectActivity ->
+            ({ model | selectedActivity = Nothing }, resetZoom ())
 
 
 -- SUBSCRIPTIONS
@@ -86,9 +78,9 @@ update msg model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ clickActivity ClickActivity
-        , unhoverActivity UnhoverActivity
-        , hoverActivity HoverActivity
+        [ unhoverActivity StopActivityPreview
+        , hoverActivity StartActivityPreview
+        , clickActivity SelectActivity
         ]
 
 
@@ -100,9 +92,9 @@ port highlightActivity : Activity -> Cmd msg
 port resetZoom : () -> Cmd msg
 port zoomActivity : Activity -> Cmd msg
 
-port clickActivity : (Activity -> msg) -> Sub msg
 port unhoverActivity : (() -> msg) -> Sub msg
 port hoverActivity : (Activity -> msg) -> Sub msg
+port clickActivity : (Activity -> msg) -> Sub msg
 
 
 -- VIEW
@@ -129,7 +121,7 @@ view model =
                         [ viewHeader model
                         , button
                             [ style [("cursor", "pointer")]
-                            , onClick (ZoomFit)
+                            , onClick (DeselectActivity)
                             ] [ text "Zoom Fit" ]
                         , ul [] (List.map (viewActivity model) model.activities)
                         ]
@@ -168,9 +160,9 @@ viewActivity : Model -> Activity -> Html Msg
 viewActivity model activity =
     li []
         [ a [ style (activityStyle model activity)
-            , onClick (ClickActivity activity)
-            , onMouseOver (HoverActivity activity)
-            , onMouseOut (UnhoverActivity ())
+            , onMouseOver (StartActivityPreview activity)
+            , onMouseOut (StopActivityPreview ())
+            , onClick (SelectActivity activity)
             ]
             [ text activity.name ]
         , (viewActivityAthlete activity.athlete)
@@ -184,13 +176,13 @@ viewActivityAthlete athlete =
 
 activityStyle : Model -> Activity -> List (String, String)
 activityStyle model activity =
-    if isHovered model activity then
+    if isPreviewingActivity model activity then
         [("cursor", "pointer"), ("text-decoration", "underline"), ("color", "red")]
     else
         [("cursor", "pointer")]
 
-isHovered : Model -> Activity -> Bool
-isHovered model activity =
-    case model.hoveredActivity of
-        Just hoveredActivity -> hoveredActivity == activity
+isPreviewingActivity : Model -> Activity -> Bool
+isPreviewingActivity model activity =
+    case model.previewedActivity of
+        Just previewedActivity -> previewedActivity == activity
         Nothing -> False
