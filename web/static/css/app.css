@@ -1,1 +1,37 @@
 /* This file is for your main application css. */
+
+button, a {
+  cursor: pointer;
+}
+
+#elmContainer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+#sideBarContainer {
+  overflow: scroll;
+  height: 100vh;
+}
+
+#mapContainer {
+  padding-left: 0;
+}
+
+#map {
+  width: 100%;
+  height: 100vh;
+}
+
+#miniMap {
+  width: 400px;
+  height: 300px;
+}
+
+.previewedActivity {
+  text-decoration: underline;
+  color: red;
+}

@@ -58,7 +58,7 @@ init flags =
 
 -- UPDATE
 
-type Msg = StartActivityPreview Activity | StopActivityPreview () | SelectActivity Activity | DeselectActivity
+type Msg = StartActivityPreview Activity | StopActivityPreview () | SelectActivity Activity | DeselectActivity | Reset
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -70,7 +70,9 @@ update msg model =
         SelectActivity activity ->
             ({ model | selectedActivity = Just activity }, zoomActivity activity)
         DeselectActivity ->
-            ({ model | selectedActivity = Nothing }, resetZoom ())
+            ({ model | selectedActivity = Nothing }, Cmd.none)
+        Reset ->
+            ({ model | selectedActivity = Nothing, previewedActivity = Nothing }, resetZoom ())
 
 
 -- SUBSCRIPTIONS
@@ -101,39 +103,25 @@ port clickActivity : (Activity -> msg) -> Sub msg
 
 view : Model -> Html Msg
 view model =
-    div [ class "row"
-        , style
-            [ ("position", "fixed")
-            , ("top", "0")
-            , ("bottom", "0")
-            , ("left", "0")
-            , ("right", "0")
-            ]
-        ]
-    [ div
-        [ class "col-xs-5 col-sm-4 col-md-3 col-lg-2"
-        , style [("overflow", "scroll"), ("height", "100vh")]
-        ]
-        [ div [ class "row center-xs" ]
-            [ div [ class "col-xs-11 col-md-10" ]
-                [ div [ class "row start-xs" ]
-                    [ div [ class "col-xs-12"]
-                        [ viewHeader model
-                        , button
-                            [ style [("cursor", "pointer")]
-                            , onClick (DeselectActivity)
-                            ] [ text "Zoom Fit" ]
-                        , ul [] (List.map (viewActivity model) model.activities)
+    div [ id "elmContainer", class "row" ]
+        [ div [ id "sideBarContainer", class "col-xs-5 col-sm-4 col-md-3 col-lg-2" ]
+            [ div [ class "row center-xs" ]
+                [ div [ class "col-xs-11 col-md-10" ]
+                    [ div [ class "row start-xs" ]
+                        [ div [ class "col-xs-12"]
+                            [ viewHeader model
+                            , button [ onClick (Reset) ] [ text "Zoom Fit" ]
+                            , ul [] (List.map (viewActivity model) model.activities)
+                            ]
                         ]
                     ]
                 ]
             ]
+        , div [ id "mapContainer", class "col-xs-7 col-sm-8 col-md-9 col-lg-10" ]
+            [ div [ id "map" ] []
+            , div [ id "miniMap" ] []
+            ]
         ]
-    , div [ class "col-xs-7 col-sm-8 col-md-9 col-lg-10", style [("padding-left", "0")] ]
-        [ div [ id "map", style [("width", "100%"), ("height", "100vh")] ] []
-        , div [ id "miniMap", style [("width", "400px"), ("height", "300px")] ] []
-        ]
-    ]
 
 viewHeader : Model -> Html Msg
 viewHeader model =
@@ -159,7 +147,7 @@ viewGreeting model =
 viewActivity : Model -> Activity -> Html Msg
 viewActivity model activity =
     li []
-        [ a [ style (activityStyle model activity)
+        [ a [ classList [ ("previewedActivity", (isPreviewingActivity model activity)) ]
             , onMouseOver (StartActivityPreview activity)
             , onMouseOut (StopActivityPreview ())
             , onClick (SelectActivity activity)
@@ -173,13 +161,6 @@ viewActivityAthlete athlete =
     case (athlete.firstname, athlete.lastname) of
         (Just firstname, Just lastname) -> text (" (" ++ firstname ++ " " ++ lastname ++ ")")
         (_, _) -> text ""
-
-activityStyle : Model -> Activity -> List (String, String)
-activityStyle model activity =
-    if isPreviewingActivity model activity then
-        [("cursor", "pointer"), ("text-decoration", "underline"), ("color", "red")]
-    else
-        [("cursor", "pointer")]
 
 isPreviewingActivity : Model -> Activity -> Bool
 isPreviewingActivity model activity =
